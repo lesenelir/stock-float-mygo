@@ -29,12 +29,12 @@ export default defineConfig({
     },
   },
 
-  // Signed auto-updates from GitHub releases (see docs/migration.zh-CN.md). Create
-  // the key pair once with `bunx mygo keygen`, paste the public key here, and
-  // keep the private key in the MYGO_UPDATER_PRIVATE_KEY secret of the
-  // repository. Until then builds do not update themselves.
-  // updates: {
-  //   publicKey: "…the contents of mygo-update.pub…",
-  //   github: "lesenelir/stock-float-mygo",
-  // },
+  // Signed auto-updates from GitHub releases (see docs/migration.zh-CN.md).
+  // `mygo build` signs them with the private key of `mygo keygen`, from the
+  // MYGO_UPDATER_PRIVATE_KEY secret in CI; without it, builds still work but
+  // write no updates.
+  updates: {
+    publicKey: "I+szEb9EdhwO0HqROd6o2wTSQhHdNESL9GbrnS5v7do=",
+    github: "lesenelir/stock-float-mygo",
+  },
 });
