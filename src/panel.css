@@ -1,0 +1,159 @@
+/* The panel sits on a HUD material (Vibrancy: VibrancyHUD) that the window
+   draws behind the page, so the page itself is transparent. The material
+   follows the system appearance, and so do the text colors: those of
+   macOS's labels and system colors in each. */
+:root {
+  color-scheme: light dark;
+  --scale: 1;
+  --primary: rgb(0 0 0 / 0.85);
+  --secondary: rgb(0 0 0 / 0.5);
+  --green: #34c759;
+  --red: #ff3b30;
+  --gray: #8e8e93;
+  --orange: #ff9500;
+  font: 500 calc(12px * var(--scale)) / 1.25 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  color: var(--primary);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: default;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary: rgb(255 255 255 / 0.9);
+    --secondary: rgb(255 255 255 / 0.55);
+    --green: #30d158;
+    --red: #ff453a;
+    --gray: #98989d;
+    --orange: #ff9f0a;
+  }
+}
+
+html,
+body {
+  margin: 0;
+  background: transparent;
+  overflow: hidden;
+}
+
+/* Linux and Windows: the whole panel drags the window (see panel.ts). */
+.drag {
+  --app-region: drag;
+}
+
+#panel {
+  /* The panel's width; its height follows the rows. */
+  width: calc(204px * var(--scale));
+  box-sizing: border-box;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rows,
+.notes {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.notes:empty {
+  display: none;
+}
+
+.row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: opacity 0.3s;
+}
+
+.row.stale {
+  opacity: 0.45;
+}
+
+/* The name is what gives way when the panel is tight; prices never wrap. */
+.name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.prices {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  flex-shrink: 0;
+}
+
+.line {
+  display: flex;
+  gap: 8px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.change {
+  width: calc(56px * var(--scale));
+  text-align: right;
+}
+
+.extended {
+  font-size: calc(10px * var(--scale));
+  color: var(--secondary);
+}
+
+.extended .price {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+/* SF Symbols rendered by scripts/make-icons.swift, drawn in the text color. */
+.session {
+  width: calc(10px * var(--scale));
+  height: calc(10px * var(--scale));
+  background: currentColor;
+  mask: center / contain no-repeat;
+}
+.session.pre {
+  mask-image: url("/sessions/pre.png");
+}
+.session.post {
+  mask-image: url("/sessions/post.png");
+}
+.session.overnight {
+  mask-image: url("/sessions/overnight.png");
+}
+
+.green {
+  color: var(--green);
+}
+.red {
+  color: var(--red);
+}
+.flat {
+  color: var(--secondary);
+}
+
+.note {
+  padding: 0 4px;
+  font-size: calc(10px * var(--scale));
+  color: var(--secondary);
+}
+
+.note.empty {
+  font-size: inherit;
+  padding: 2px 4px;
+}
+
+.note.outage {
+  color: var(--orange);
+}

@@ -1,0 +1,33 @@
+name: CI
+
+# Documentation-only changes skip the run.
+on:
+  push:
+    branches: [master]
+    paths-ignore: ["**.md", "LICENSE"]
+  pull_request:
+    paths-ignore: ["**.md", "LICENSE"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    # MyGo needs no cgo, so Linux checks the macOS code too (GOOS=darwin).
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: go vet ./...
+      - run: GOOS=darwin go vet ./...
+      - run: go test -race ./...
+      - run: bun run typecheck

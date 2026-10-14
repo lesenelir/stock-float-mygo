@@ -4,27 +4,139 @@ import { call, event } from "mygo-runtime";
 
 // ---- Types ----
 
-/** SystemInfo describes the machine the app runs on. */
-export interface SystemInfo {
-  os: string;
-  arch: string;
-  goVersion: string;
+/**
+ * PanelState is everything the panel shows, worded in the interface
+ * language. Go sends it whole on every change.
+ */
+export interface PanelState {
+  rows: Row[];
+  /** EmptyHint is shown when the watch list is empty. */
+  emptyHint?: string;
+  /** Outages say which data sources are unreachable, and why. */
+  outages: string[];
+  /**
+   * UpdateHint says a new version is out; quiet on purpose, as the panel
+   * is on screen all day.
+   */
+  updateHint?: string;
+  upColor: UpColor;
+  /** Scale multiplies the fonts and the width of the panel. */
+  scale: number;
 }
+
+/** Row is one symbol of the watch list. */
+export interface Row {
+  symbol: string;
+  /**
+   * Label is the ticker for US stocks, which are short already, and the
+   * name for other markets, which read better by name.
+   */
+  label: string;
+  /** Quote is null until the first price arrives. */
+  quote: RowQuote | null;
+}
+
+/**
+ * RowExtended is the price of a pre-market, post-market or overnight
+ * session, shown on a second line.
+ */
+export interface RowExtended {
+  session: Session;
+  /** Label names the session, for assistive technology. */
+  label: string;
+  price: number;
+  changePercent: number;
+}
+
+/** RowQuote is the latest price of a row. */
+export interface RowQuote {
+  price: number;
+  changePercent: number;
+  /**
+   * StaleAt is when the price, if it does not change, gets old enough to
+   * be misleading, in milliseconds since the epoch; 0 when the source
+   * does not say when it traded.
+   */
+  staleAt: number;
+  extended?: RowExtended;
+}
+
+export type Session = string;
+
+/**
+ * SettingsForm is the settings window's content: the saved settings and
+ * the texts around them.
+ */
+export interface SettingsForm {
+  strings: SettingsStrings;
+  symbols: string;
+  longbridge: boolean;
+  finnhubKey: string;
+}
+
+/** SettingsStrings are the texts of the settings window. */
+export interface SettingsStrings {
+  title: string;
+  symbolsLabel: string;
+  symbolsHint: string;
+  longbridgeToggle: string;
+  longbridgeHint: string;
+  finnhubKey: string;
+  finnhubPlaceholder: string;
+  cancel: string;
+  save: string;
+  lang: string;
+}
+
+export type UpColor = string;
 
 // ---- Services ----
 
-/**
- * Greeter is callable from the frontend: `mygo generate` turns its methods
- * into typed TypeScript functions in src/mygo.ts.
- */
-export const Greeter = {
-  /** Greet returns a greeting for name. */
-  greet(name: string): Promise<string> {
-    return call("Greeter.Greet", name);
+/** Panel is what the floating panel's page calls. */
+export const Panel = {
+  /**
+   * Resize fits the panel around its content, in DIPs. The first call places
+   * and shows the panel.
+   */
+  resize(width: number, height: number): Promise<void> {
+    return call("Panel.Resize", width, height);
   },
-  /** Info returns information about the system. */
-  info(): Promise<SystemInfo> {
-    return call("Greeter.Info");
+  /**
+   * ShowMenu opens the panel's menu. On macOS the window opens it itself, as
+   * the page gets no clicks there.
+   */
+  showMenu(): Promise<void> {
+    return call("Panel.ShowMenu");
+  },
+  /** State returns what the panel shows now; PanelChanged sends the changes. */
+  state(): Promise<PanelState> {
+    return call("Panel.State");
+  },
+} as const;
+
+/** Settings is what the settings window's page calls. */
+export const Settings = {
+  /** Cancel closes the settings window without saving. */
+  cancel(): Promise<void> {
+    return call("Settings.Cancel");
+  },
+  /**
+   * Fit sizes the settings window around its page, in DIPs, and shows it in
+   * front of the other apps.
+   */
+  fit(width: number, height: number): Promise<void> {
+    return call("Settings.Fit", width, height);
+  },
+  /** Load returns the settings to edit. */
+  load(): Promise<SettingsForm> {
+    return call("Settings.Load");
+  },
+  /**
+   * Save checks and saves the settings, then closes the window. It fails,
+   * saying which entries, when some symbols cannot be read.
+   */
+  save(symbols: string, longbridge: boolean, finnhubKey: string): Promise<void> {
+    return call("Settings.Save", symbols, longbridge, finnhubKey);
   },
 } as const;
 
@@ -32,6 +144,9 @@ export const Greeter = {
 
 /** Events sent by the Go side. Subscribe with `events.name.on(listener)`. */
 export const events = {
-  /** Tick is sent to the page every second. */
-  tick: event<string>("tick"),
+  /**
+   * PanelChanged sends the panel what to show whenever quotes or settings
+   * change.
+   */
+  panel: event<PanelState>("panel"),
 } as const;

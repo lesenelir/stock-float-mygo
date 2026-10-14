@@ -1,65 +1,46 @@
+// StockFloat shows live prices and daily change for the stocks you follow,
+// in a small panel that floats above every app and never takes focus.
+//
+// Go does the work: it reads the settings, runs the quote feeds, and owns
+// the menus, the menu bar icon, the shortcut and updates. The panel and the
+// settings window are web pages (src/), which call Go through the client
+// `mygo generate` writes to src/mygo.ts.
 package main
 
 import (
+	_ "embed"
 	"log"
-	"runtime"
-	"time"
 
 	"github.com/egoist/mygo"
 )
 
-// Greeter is callable from the frontend: `mygo generate` turns its methods
-// into typed TypeScript functions in src/mygo.ts.
-type Greeter struct{}
-
-// Greet returns a greeting for name.
-func (Greeter) Greet(name string) string {
-	if name == "" {
-		name = "stranger"
-	}
-	return "Hello, " + name + "! This message comes from Go."
-}
-
-// SystemInfo describes the machine the app runs on.
-type SystemInfo struct {
-	OS        string `json:"os"`
-	Arch      string `json:"arch"`
-	GoVersion string `json:"goVersion"`
-}
-
-// Info returns information about the system.
-func (Greeter) Info() SystemInfo {
-	return SystemInfo{OS: runtime.GOOS, Arch: runtime.GOARCH, GoVersion: runtime.Version()}
-}
-
-// Tick is sent to the page every second.
-var Tick = mygo.NewEvent[time.Time]("tick")
+//go:embed assets/tray.png
+var trayIcon []byte
 
 func main() {
-	mygo.Bind(Greeter{})
+	// Opening the app again, from Finder or Spotlight, shows the panel of the
+	// running one.
+	if !mygo.App.RequestSingleInstanceLock() {
+		return
+	}
+	app := newApp()
+	mygo.Bind(Panel{app})
+	mygo.Bind(Settings{app})
 
-	mygo.App.WhenReady(func() {
-		win := mygo.NewWindow(mygo.WindowOptions{
-			Title:           "stock-float-mygo",
-			Width:           960,
-			Height:          640,
-			MinWidth:        480,
-			MinHeight:       360,
-			BackgroundColor: "light-dark(#f6f7f9, #0f1115)", // the page's --bg in src/style.css
-			// Opens where the user left it last time.
-			StateKey: "main",
-			// The frontend: devUrl during `mygo dev`, frontendDist
-			// embedded by `mygo build` otherwise (see mygo.json).
-			URL: "/",
-		})
-		go func() {
-			for t := range time.Tick(time.Second) {
-				if Tick.Emit(win, t) != nil {
-					return // the window was closed
-				}
-			}
-		}()
-	})
+	// The bundle is marked as a background app (LSUIElement in
+	// mygo.config.ts), so that a user who turned the Dock icon off never sees
+	// it flash; the Dock icon comes back here when it is on.
+	mygo.App.SetActivationPolicy(activationPolicy(app.store.Config()))
+	// The panel only ever hides, but the settings window closes: keep running
+	// with no window open.
+	mygo.App.OnWindowAllClosed(func() {})
+	// Clicking the Dock icon, or opening the app again, brings a hidden
+	// panel back.
+	mygo.App.OnActivate(func(bool) { app.showPanel() })
+	mygo.App.OnSecondInstance(func([]string, string) { app.showPanel() })
+	mygo.App.OnQuit(app.store.Stop)
+
+	mygo.App.WhenReady(app.ready)
 	if err := mygo.App.Run(); err != nil {
 		log.Fatal(err)
 	}

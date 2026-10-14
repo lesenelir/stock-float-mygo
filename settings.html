@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StockFloat Settings</title>
+    <link rel="stylesheet" href="./src/settings.css" />
+  </head>
+  <body>
+    <form id="settings" hidden>
+      <div class="field">
+        <label for="symbols" id="symbols-label"></label>
+        <textarea id="symbols" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+        <p class="hint" id="symbols-hint"></p>
+        <p class="error" id="error" role="alert" hidden></p>
+      </div>
+      <div class="field">
+        <label class="toggle"><input type="checkbox" id="longbridge" /> <span id="longbridge-label"></span></label>
+        <p class="hint" id="longbridge-hint"></p>
+      </div>
+      <div class="field">
+        <label for="finnhub" id="finnhub-label"></label>
+        <input id="finnhub" type="text" spellcheck="false" autocomplete="off" />
+      </div>
+      <div class="buttons">
+        <button type="button" id="cancel"></button>
+        <button type="submit" id="save" class="default"></button>
+      </div>
+    </form>
+    <script type="module" src="./src/settings.ts"></script>
+  </body>
+</html>
