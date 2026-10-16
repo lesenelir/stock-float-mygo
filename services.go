@@ -109,6 +109,7 @@ func (s Settings) Save(ctx context.Context, symbols string, longbridge bool, fin
 		c.Symbols = ids
 		c.Longbridge = longbridge
 		c.FinnhubKey = strings.TrimSpace(finnhubKey)
+		c.DropOrphanAlerts()
 	})
 	if win := mygo.CallerWindow(ctx); win != nil {
 		win.Close()

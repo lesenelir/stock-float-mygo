@@ -26,6 +26,7 @@ func main() {
 	app := newApp()
 	mygo.Bind(Panel{app})
 	mygo.Bind(Settings{app})
+	mygo.Bind(Alerts{app})
 
 	// The bundle is marked as a background app (LSUIElement in
 	// mygo.config.ts), so that a user who turned the Dock icon off never sees

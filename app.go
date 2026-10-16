@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"sync/atomic"
 
 	"github.com/egoist/mygo"
 
@@ -23,6 +24,7 @@ type App struct {
 
 	panel    *mygo.Window // main thread, after WhenReady
 	settings *mygo.Window // main thread; nil while closed
+	alerts   *mygo.Window // main thread; nil while closed
 	tray     *mygo.Tray   // main thread
 	hotkey   string       // main thread; the registered accelerator, or ""
 
@@ -30,11 +32,15 @@ type App struct {
 	clickThroughStop chan struct{}  // main thread
 
 	updates updates
+	// notificationsDenied is set once the user has been told that alerts
+	// cannot notify them.
+	notificationsDenied atomic.Bool
 }
 
 func newApp() *App {
 	a := &App{}
 	a.store = NewStore(config.Path(), a.pushState)
+	a.store.OnAlert(a.notifyAlerts)
 	return a
 }
 
@@ -48,12 +54,16 @@ func (a *App) state() PanelState {
 	return panelState(a.store.Snapshot(), a.strings(), a.updates.offered())
 }
 
-// pushState sends the panel what it shows now.
+// pushState sends the panel, and the alerts window while open, what they
+// show now.
 func (a *App) pushState() {
-	var panel *mygo.Window
-	mygo.RunOnMain(func() { panel = a.panel })
+	var panel, alerts *mygo.Window
+	mygo.RunOnMain(func() { panel, alerts = a.panel, a.alerts })
 	if panel != nil {
 		_ = PanelChanged.Emit(panel, a.state())
+	}
+	if alerts != nil {
+		_ = AlertsChanged.Emit(alerts, alertsState(a.store.Snapshot(), a.strings()))
 	}
 }
 
@@ -127,6 +137,9 @@ func (a *App) change(fn func(*config.Config)) {
 			mygo.App.Dock.SetMenu(a.dockMenu())
 			if a.settings != nil {
 				a.settings.Close()
+			}
+			if a.alerts != nil {
+				a.alerts.Close()
 			}
 		}
 	})

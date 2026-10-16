@@ -9,9 +9,10 @@ export default defineConfig({
     watch: { ignored: ["**/.mygo/**", "**/build/**"] },
   },
   build: {
-    // Two pages: the panel (/) and the settings window (/settings.html).
+    // Three pages: the panel (/), the settings window (/settings.html) and
+    // the price alerts window (/alerts.html).
     rolldownOptions: {
-      input: { panel: "index.html", settings: "settings.html" },
+      input: { panel: "index.html", settings: "settings.html", alerts: "alerts.html" },
     },
   },
 });

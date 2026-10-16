@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Price Alerts</title>
+    <link rel="stylesheet" href="./src/settings.css" />
+    <link rel="stylesheet" href="./src/alerts.css" />
+  </head>
+  <body>
+    <form id="alerts" hidden>
+      <div class="field" id="new-symbol">
+        <label for="symbol" id="symbol-label"></label>
+        <div class="line">
+          <select id="symbol"></select>
+          <span class="hint" id="detail"></span>
+        </div>
+      </div>
+      <div class="field" id="new-price">
+        <label for="price" id="price-label"></label>
+        <div class="line">
+          <div class="segmented" role="radiogroup" id="direction">
+            <label><input type="radio" name="direction" id="rises" checked /><span id="rises-label"></span></label>
+            <label><input type="radio" name="direction" id="falls" /><span id="falls-label"></span></label>
+          </div>
+          <input id="price" type="text" inputmode="decimal" spellcheck="false" autocomplete="off" />
+          <button type="submit" id="add" class="default"></button>
+        </div>
+        <p class="error" id="error" role="alert" hidden></p>
+      </div>
+      <p class="hint" id="need-symbols" hidden></p>
+      <hr />
+      <ul id="list"></ul>
+      <p class="hint" id="empty" hidden></p>
+      <div class="buttons">
+        <button type="button" id="done"></button>
+      </div>
+    </form>
+    <script type="module" src="./src/alerts.ts"></script>
+  </body>
+</html>

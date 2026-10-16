@@ -4,6 +4,61 @@ import { call, event } from "mygo-runtime";
 
 // ---- Types ----
 
+export interface Alert {
+  symbol: string;
+  price: number;
+  below: boolean;
+}
+
+/** AlertRow is an alert waiting to go off. */
+export interface AlertRow {
+  alert: Alert;
+  label: string;
+  condition: string;
+}
+
+/** AlertSymbol is a symbol of the watch list, as the window offers it. */
+export interface AlertSymbol {
+  id: string;
+  /**
+   * Text is the symbol as the settings write it, with its name where the
+   * code is a number: 腾讯控股 hk00700.
+   */
+  text: string;
+  /** Price is the newest price, or 0 before the first one. */
+  price: number;
+  /** Detail says the name and the newest price, to set the alert against. */
+  detail: string;
+  /** PriceText is the newest price as the panel writes it, or "". */
+  priceText: string;
+}
+
+/**
+ * AlertsState is the price alerts window's content: the symbols an alert
+ * can be set on, the alerts waiting to go off, and the texts around them.
+ */
+export interface AlertsState {
+  strings: AlertsStrings;
+  symbols: AlertSymbol[];
+  alerts: AlertRow[];
+}
+
+/** AlertsStrings are the texts of the price alerts window. */
+export interface AlertsStrings {
+  title: string;
+  symbol: string;
+  price: string;
+  direction: string;
+  rises: string;
+  falls: string;
+  add: string;
+  remove: string;
+  done: string;
+  noAlerts: string;
+  needSymbols: string;
+  lang: string;
+}
+
 /**
  * PanelState is everything the panel shows, worded in the interface
  * language. Go sends it whole on every change.
@@ -140,10 +195,45 @@ export const Settings = {
   },
 } as const;
 
+/** Alerts is what the price alerts window's page calls. */
+export const Alerts = {
+  /**
+   * Add sets an alert on a symbol of the watch list. It fails, saying why,
+   * when the price is not one.
+   */
+  add(symbol: string, price: string, below: boolean): Promise<void> {
+    return call("Alerts.Add", symbol, price, below);
+  },
+  /** Close closes the price alerts window. */
+  close(): Promise<void> {
+    return call("Alerts.Close");
+  },
+  /**
+   * Fit sizes the price alerts window around its page, in DIPs, and shows it
+   * in front of the other apps.
+   */
+  fit(width: number, height: number): Promise<void> {
+    return call("Alerts.Fit", width, height);
+  },
+  /** Remove removes an alert. */
+  remove(alert: Alert): Promise<void> {
+    return call("Alerts.Remove", alert);
+  },
+  /** State returns what the window shows now; AlertsChanged sends the changes. */
+  state(): Promise<AlertsState> {
+    return call("Alerts.State");
+  },
+} as const;
+
 // ---- Events ----
 
 /** Events sent by the Go side. Subscribe with `events.name.on(listener)`. */
 export const events = {
+  /**
+   * AlertsChanged sends the price alerts window what to show whenever quotes
+   * or settings change.
+   */
+  alerts: event<AlertsState>("alerts"),
   /**
    * PanelChanged sends the panel what to show whenever quotes or settings
    * change.
