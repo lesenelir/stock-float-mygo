@@ -69,7 +69,7 @@ bun run build -- -platform darwin/universal
 
 `swift scripts/make-icons.swift` redraws the app icon, the menu bar icon and the session marks from `assets/icon-source.png` and SF Symbols.
 
-Pushing a tag `v<version>` (the `version` in package.json) builds the universal app and attaches it to a draft release. Signed in-app updates need a key pair once; see `updates` in `mygo.config.ts`.
+Pushing a tag `v<version>` (the `version` in package.json) builds the universal app and publishes it as a release, which installed apps offer as an update. Signed in-app updates need a key pair once; see `updates` in `mygo.config.ts`.
 
 ## Disclaimer
 
