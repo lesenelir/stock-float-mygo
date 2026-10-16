@@ -30,6 +30,9 @@ type App struct {
 
 	placement        panelPlacement // main thread
 	clickThroughStop chan struct{}  // main thread
+	// quitting is set as a quit starts, when the panel may close. Main
+	// thread.
+	quitting bool
 
 	updates updates
 	// notificationsDenied is set once the user has been told that alerts

@@ -47,8 +47,13 @@ func (a *App) createPanel(cfg config.Config) {
 	a.panel = win
 	makePanel(win, a.showContextMenu)
 
-	// The panel hides rather than closes, should anything ask it to.
+	// The panel hides rather than closes, should anything but quitting ask it
+	// to: Quit closes every window first, and a window that stays open
+	// cancels it.
 	win.OnClose(func(e *mygo.CloseEvent) {
+		if a.quitting {
+			return
+		}
 		e.PreventDefault()
 		a.hidePanel()
 	})
