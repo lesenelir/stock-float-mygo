@@ -75,6 +75,8 @@ export interface PanelState {
    */
   updateHint?: string;
   upColor: UpColor;
+  /** Flash is whether price moves light up their row. */
+  flash: boolean;
   /** Scale multiplies the fonts and the width of the panel. */
   scale: number;
 }

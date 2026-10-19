@@ -20,6 +20,8 @@ type PanelState struct {
 	// is on screen all day.
 	UpdateHint string         `json:"updateHint,omitempty"`
 	UpColor    config.UpColor `json:"upColor"`
+	// Flash is whether price moves light up their row.
+	Flash bool `json:"flash"`
 	// Scale multiplies the fonts and the width of the panel.
 	Scale float64 `json:"scale"`
 }
@@ -61,6 +63,7 @@ func panelState(snap Snapshot, s l10n.Strings, update string) PanelState {
 		Rows:    make([]Row, 0, len(snap.Config.Symbols)),
 		Outages: []string{},
 		UpColor: snap.Config.UpColor,
+		Flash:   snap.Config.Flash,
 		Scale:   snap.Config.TextSize.Scale(),
 	}
 	for _, id := range snap.Config.Symbols {

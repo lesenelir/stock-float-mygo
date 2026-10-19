@@ -42,8 +42,9 @@ function render(state: PanelState) {
       continue;
     }
     lastPrices.set(row.symbol, price);
-    // Only regular-session moves flash; extended-hours ticks update quietly.
-    if (old !== undefined && old !== price && !row.quote?.extended) {
+    // Only regular-session moves flash, and only while the user wants them
+    // to; extended-hours ticks update quietly.
+    if (state.flash && old !== undefined && old !== price && !row.quote?.extended) {
       flash(els[i]!, tint(price - old, state.upColor) || "gray");
     }
   }
