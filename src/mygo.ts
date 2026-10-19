@@ -75,6 +75,9 @@ export interface PanelState {
    */
   updateHint?: string;
   upColor: UpColor;
+  /** GreenShade and RedShade are the green and red the changes are in. */
+  greenShade: Shade;
+  redShade: Shade;
   /** Flash is whether price moves light up their row. */
   flash: boolean;
   /** Scale multiplies the fonts and the width of the panel. */
@@ -144,6 +147,8 @@ export interface SettingsStrings {
   save: string;
   lang: string;
 }
+
+export type Shade = string;
 
 export type UpColor = string;
 

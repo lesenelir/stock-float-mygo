@@ -17,7 +17,11 @@ let rowEls = new Map<string, HTMLElement>();
 const lastPrices = new Map<string, number>();
 
 function render(state: PanelState) {
-  document.documentElement.style.setProperty("--scale", String(state.scale));
+  const root = document.documentElement;
+  root.style.setProperty("--scale", String(state.scale));
+  // panel.css holds the shades; "system" keeps macOS's colors.
+  root.dataset.green = state.greenShade;
+  root.dataset.red = state.redShade;
 
   const els = state.rows.map((row) => {
     const el = rowEls.get(row.symbol) ?? div("row");
